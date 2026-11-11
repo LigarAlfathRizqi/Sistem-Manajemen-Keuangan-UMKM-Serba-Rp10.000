@@ -10,4 +10,13 @@
         <maven.compiler.release>26</maven.compiler.release>
         <exec.mainClass>latihan.sistemmanajemenkeuanganumkmserba10000.SistemManajemenKeuanganUMKMSerba10000</exec.mainClass>
     </properties>
+
+    <dependencies>
+        <!-- Library JFreeChart untuk membuat grafik -->
+        <dependency>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
+            <version>1.5.3</version>
+        </dependency>
+    </dependencies>
 </project>
