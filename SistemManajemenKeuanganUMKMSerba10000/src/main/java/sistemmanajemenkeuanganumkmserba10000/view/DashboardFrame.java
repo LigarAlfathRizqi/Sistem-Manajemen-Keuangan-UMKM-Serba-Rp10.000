@@ -11,8 +11,21 @@ import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.chart.renderer.category.BarRenderer;
 import org.jfree.data.category.DefaultCategoryDataset;
+import sistemmanajemenkeuanganumkmserba10000.entity.Transaksi;
+import sistemmanajemenkeuanganumkmserba10000.model.LaporanTableModel;
+import sistemmanajemenkeuanganumkmserba10000.model.RupiahUtil;
+import sistemmanajemenkeuanganumkmserba10000.repository.TransaksiRepository;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.swing.JLabel;
+import java.awt.event.ActionListener;
 
 /**
  *
@@ -21,14 +34,87 @@ import java.awt.Color;
 public class DashboardFrame extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(DashboardFrame.class.getName());
+    private final TransaksiRepository transaksiRepository = new TransaksiRepository();
+    private final JLabel lblProdukTerlaris = new JLabel("Belum ada transaksi", JLabel.CENTER);
+    private final JLabel lblPengeluaranTerbesar = new JLabel("Belum ada transaksi", JLabel.CENTER);
 
     /**
      * Creates new form DashboardFrame
      */
     public DashboardFrame() {
         initComponents();
-        
-        tampilkanGrafik();
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        for (ActionListener listener : cbFilterMinggu.getActionListeners()) {
+            cbFilterMinggu.removeActionListener(listener);
+        }
+        cbFilterMinggu.removeAllItems();
+        for (int i = 0; i < 12; i++) {
+            cbFilterMinggu.addItem(i == 0 ? "Minggu ini" : "" + i + " minggu lalu");
+        }
+        cbFilterMinggu.addActionListener(this::cbFilterMingguActionPerformed);
+        jPanel12.setLayout(new BorderLayout());
+        jPanel12.add(jLabel8, BorderLayout.NORTH);
+        jPanel12.add(lblProdukTerlaris, BorderLayout.CENTER);
+        jPanel14.setLayout(new BorderLayout());
+        jPanel14.add(jLabel9, BorderLayout.NORTH);
+        jPanel14.add(lblPengeluaranTerbesar, BorderLayout.CENTER);
+        jLabel9.setText("Pengeluaran Terbesar");
+        Navigasi.pasang(this);
+        muatDashboard();
+    }
+
+    private LocalDate awalMingguTerpilih() {
+        int index = Math.max(0, cbFilterMinggu.getSelectedIndex());
+        return LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY)).minusWeeks(index);
+    }
+
+    private void muatDashboard() {
+        LocalDate mulai = awalMingguTerpilih();
+        LocalDate sampai = mulai.plusDays(6);
+        try {
+            List<Transaksi> transaksi = transaksiRepository.findByRange(mulai, sampai);
+            LaporanTableModel ringkasan = new LaporanTableModel();
+            ringkasan.setData(transaksi);
+            jLabel10.setText("<html><center>Pemasukan<br>" + RupiahUtil.format(ringkasan.getTotalPemasukan()) + "</center></html>");
+            jLabel11.setText("<html><center>Pengeluaran<br>" + RupiahUtil.format(ringkasan.getTotalPengeluaran()) + "</center></html>");
+            jLabel12.setText("<html><center>Laba<br>" + RupiahUtil.format(ringkasan.getTotalLaba()) + "</center></html>");
+            tampilkanProdukTerlaris(transaksi);
+            tampilkanPengeluaranTerbesar(transaksi);
+            tampilkanGrafik(transaksi, mulai);
+        } catch (java.sql.SQLException ex) {
+            UiUtil.showError(this, ex);
+            jLabel10.setText("<html><center>Pemasukan<br>Rp 0</center></html>");
+            jLabel11.setText("<html><center>Pengeluaran<br>Rp 0</center></html>");
+            jLabel12.setText("<html><center>Laba<br>Rp 0</center></html>");
+            lblProdukTerlaris.setText("Database belum tersedia");
+            lblPengeluaranTerbesar.setText("Database belum tersedia");
+            tampilkanGrafik(List.of(), mulai);
+        }
+    }
+
+    private void tampilkanProdukTerlaris(List<Transaksi> transaksi) {
+        Map<String, Integer> jumlahPerProduk = new HashMap<>();
+        for (Transaksi item : transaksi) {
+            jumlahPerProduk.merge(item.getProduk().getNama(), item.getJumlah(), Integer::sum);
+        }
+        String best = jumlahPerProduk.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(entry -> entry.getKey() + " — " + entry.getValue() + " terjual")
+                .orElse("Belum ada transaksi");
+        lblProdukTerlaris.setText(best);
+    }
+
+    private void tampilkanPengeluaranTerbesar(List<Transaksi> transaksi) {
+        Map<String, java.math.BigDecimal> biayaPerProduk = new HashMap<>();
+        for (Transaksi item : transaksi) {
+            java.math.BigDecimal biaya = item.getModalSatuan().multiply(java.math.BigDecimal.valueOf(item.getJumlah()));
+            biayaPerProduk.merge(item.getProduk().getNama(), biaya, java.math.BigDecimal::add);
+        }
+        String largest = biayaPerProduk.entrySet().stream()
+                .max(Map.Entry.comparingByValue())
+                .map(entry -> entry.getKey() + " — " + RupiahUtil.format(entry.getValue()))
+                .orElse("Belum ada transaksi");
+        lblPengeluaranTerbesar.setText(largest);
     }
 
     /**
@@ -279,7 +365,7 @@ public class DashboardFrame extends javax.swing.JFrame {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        cbFilterMinggu.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbFilterMinggu.setModel(new javax.swing.DefaultComboBoxModel<>(new String[0]));
         cbFilterMinggu.addActionListener(this::cbFilterMingguActionPerformed);
 
         panelGrafik.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
@@ -446,25 +532,32 @@ public class DashboardFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cbFilterMingguActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbFilterMingguActionPerformed
-        // TODO add your handling code here:
-        
+        muatDashboard();
     }//GEN-LAST:event_cbFilterMingguActionPerformed
 
     private void lblDetailMingguan(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_lblDetailMingguan
-        // TODO add your handling code here:
         new Laporan().setVisible(true);
         this.dispose();
     }//GEN-LAST:event_lblDetailMingguan
 
-    private void tampilkanGrafik() {
-        // 1. Data Grafik
+    private void tampilkanGrafik(List<Transaksi> transaksi, LocalDate mulai) {
         DefaultCategoryDataset dataset = new DefaultCategoryDataset();
         String[] hari = {"Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"};
-
-        for (String h : hari) {
-            dataset.addValue(200, "Biru", h);
-            dataset.addValue(90,  "Merah", h);
-            dataset.addValue(140, "Hijau", h);
+        java.math.BigDecimal[] pemasukan = new java.math.BigDecimal[7];
+        java.math.BigDecimal[] pengeluaran = new java.math.BigDecimal[7];
+        java.util.Arrays.fill(pemasukan, java.math.BigDecimal.ZERO);
+        java.util.Arrays.fill(pengeluaran, java.math.BigDecimal.ZERO);
+        for (Transaksi item : transaksi) {
+            int index = (int) java.time.temporal.ChronoUnit.DAYS.between(mulai, item.getTanggal());
+            if (index < 0 || index >= 7) continue;
+            java.math.BigDecimal jumlah = java.math.BigDecimal.valueOf(item.getJumlah());
+            pemasukan[index] = pemasukan[index].add(item.getHargaJualSatuan().multiply(jumlah));
+            pengeluaran[index] = pengeluaran[index].add(item.getModalSatuan().multiply(jumlah));
+        }
+        for (int i = 0; i < hari.length; i++) {
+            dataset.addValue(pemasukan[i], "Pemasukan", hari[i]);
+            dataset.addValue(pengeluaran[i], "Pengeluaran", hari[i]);
+            dataset.addValue(pemasukan[i].subtract(pengeluaran[i]), "Laba", hari[i]);
         }
 
         // 2. Buat Diagram JFreeChart
@@ -474,7 +567,7 @@ public class DashboardFrame extends javax.swing.JFrame {
                 "",                     
                 dataset, 
                 PlotOrientation.VERTICAL, 
-                false,                  
+                true,
                 true, 
                 false
         );
@@ -485,9 +578,9 @@ public class DashboardFrame extends javax.swing.JFrame {
         plot.setRangeGridlinePaint(Color.LIGHT_GRAY);
 
         BarRenderer renderer = (BarRenderer) plot.getRenderer();
-        renderer.setSeriesPaint(0, Color.BLUE);             // Batang 1
-        renderer.setSeriesPaint(1, Color.RED);              // Batang 2
-        renderer.setSeriesPaint(2, new Color(34, 139, 34)); // Batang 3
+        renderer.setSeriesPaint(0, Color.BLUE);
+        renderer.setSeriesPaint(1, Color.RED);
+        renderer.setSeriesPaint(2, new Color(34, 139, 34));
         renderer.setItemMargin(0.0);                        // Merapatkan batang
 
         // 4. Masukkan Grafik ke dalam panelGrafik dari Design

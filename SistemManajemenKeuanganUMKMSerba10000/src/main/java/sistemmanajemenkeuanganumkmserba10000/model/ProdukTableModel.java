@@ -37,7 +37,8 @@ public class ProdukTableModel extends AbstractTableModel {
 
         for (ProdukBahan pb : daftarProdukBahan) {
             if (pb.getProduk().getId() == produk.getId()) {
-                modal = modal.add(pb.getBahan().getHarga());
+                modal = modal.add(pb.getBahan().getHarga()
+                        .multiply(pb.getJumlahPemakaian()));
             }
         }
 
@@ -53,7 +54,9 @@ public class ProdukTableModel extends AbstractTableModel {
 
         for (ProdukBahan pb : daftarProdukBahan) {
             if (pb.getProduk().getId() == produk.getId()) {
-                namaBahan.add(pb.getBahan().getNama());
+                namaBahan.add(pb.getBahan().getNama() + " ("
+                        + pb.getJumlahPemakaian().stripTrailingZeros().toPlainString()
+                        + " " + pb.getBahan().getSatuan() + ")");
             }
         }
 

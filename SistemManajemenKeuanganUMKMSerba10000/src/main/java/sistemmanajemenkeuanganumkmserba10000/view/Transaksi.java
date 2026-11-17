@@ -1,5 +1,21 @@
 package sistemmanajemenkeuanganumkmserba10000.view;
 
+import sistemmanajemenkeuanganumkmserba10000.entity.Produk;
+import sistemmanajemenkeuanganumkmserba10000.entity.ProdukBahan;
+import sistemmanajemenkeuanganumkmserba10000.model.RupiahUtil;
+import sistemmanajemenkeuanganumkmserba10000.repository.ProdukBahanRepository;
+import sistemmanajemenkeuanganumkmserba10000.repository.ProdukRepository;
+import sistemmanajemenkeuanganumkmserba10000.repository.TransaksiRepository;
+
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JOptionPane;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+import java.util.List;
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
@@ -12,12 +28,100 @@ package sistemmanajemenkeuanganumkmserba10000.view;
 public class Transaksi extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Transaksi.class.getName());
+    private final ProdukRepository produkRepository = new ProdukRepository();
+    private final ProdukBahanRepository resepRepository = new ProdukBahanRepository();
+    private final TransaksiRepository transaksiRepository = new TransaksiRepository();
 
     /**
      * Creates new form Transaksi
      */
     public Transaksi() {
         initComponents();
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        txtTanggal.setText(LocalDate.now().toString());
+        txtHargaSatuan.setEditable(false);
+        txtTotal.setEditable(false);
+        cbProduk.setModel(new DefaultComboBoxModel<>());
+        txtJumlah.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent event) {
+                perbaruiTotal();
+            }
+        });
+        Navigasi.pasang(this);
+        muatProduk();
+    }
+
+    private void muatProduk() {
+        try {
+            List<Produk> produk = produkRepository.findAll();
+            DefaultComboBoxModel<Produk> model = new DefaultComboBoxModel<>();
+            for (Produk item : produk) model.addElement(item);
+            cbProduk.setModel(model);
+            cbProdukActionPerformed(null);
+            btnSimpan.setEnabled(!produk.isEmpty());
+        } catch (java.sql.SQLException ex) {
+            UiUtil.showError(this, ex);
+            btnSimpan.setEnabled(false);
+        }
+    }
+
+    private void perbaruiTotal() {
+        Produk produk = (Produk) cbProduk.getSelectedItem();
+        if (produk == null) {
+            txtHargaSatuan.setText("");
+            txtTotal.setText("");
+            return;
+        }
+        txtHargaSatuan.setText(RupiahUtil.format(produk.getHarga()));
+        try {
+            int jumlah = Integer.parseInt(txtJumlah.getText().trim());
+            txtTotal.setText(jumlah > 0
+                    ? RupiahUtil.format(produk.getHarga().multiply(BigDecimal.valueOf(jumlah)))
+                    : "");
+        } catch (NumberFormatException ex) {
+            txtTotal.setText("");
+        }
+    }
+
+    private void simpanTransaksi() {
+        Produk produk = (Produk) cbProduk.getSelectedItem();
+        if (produk == null) {
+            JOptionPane.showMessageDialog(this, "Tambahkan produk dan resep terlebih dahulu.");
+            return;
+        }
+        try {
+            LocalDate tanggal = LocalDate.parse(txtTanggal.getText().trim());
+            int jumlah = Integer.parseInt(txtJumlah.getText().trim());
+            if (jumlah <= 0) throw new NumberFormatException();
+            List<ProdukBahan> resep = resepRepository.findByProdukId(produk.getId());
+            if (resep.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Produk belum memiliki bahan/resep.",
+                        "Resep belum lengkap", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            BigDecimal modalPerProduk = resep.stream()
+                    .map(item -> item.getBahan().getHarga().multiply(item.getJumlahPemakaian()))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            sistemmanajemenkeuanganumkmserba10000.entity.Transaksi transaksi =
+                    new sistemmanajemenkeuanganumkmserba10000.entity.Transaksi(0, tanggal, produk,
+                            jumlah, txtKeterangan.getText().trim(), produk.getHarga(), modalPerProduk);
+            transaksiRepository.save(transaksi);
+            JOptionPane.showMessageDialog(this,
+                    "Transaksi tersimpan. Penjualan produk yang sama pada tanggal tersebut dijumlahkan.",
+                    "Transaksi tersimpan", JOptionPane.INFORMATION_MESSAGE);
+            txtJumlah.setText("");
+            txtKeterangan.setText("");
+            perbaruiTotal();
+        } catch (DateTimeParseException ex) {
+            JOptionPane.showMessageDialog(this, "Tanggal harus memakai format YYYY-MM-DD.",
+                    "Tanggal tidak valid", JOptionPane.WARNING_MESSAGE);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Jumlah produk harus berupa bilangan bulat lebih dari nol.",
+                    "Jumlah tidak valid", JOptionPane.WARNING_MESSAGE);
+        } catch (java.sql.SQLException ex) {
+            UiUtil.showError(this, ex);
+        }
     }
 
     /**
@@ -132,7 +236,7 @@ public class Transaksi extends javax.swing.JFrame {
 
         txtTanggal.addActionListener(this::txtTanggalActionPerformed);
 
-        cbProduk.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbProduk.setModel(new javax.swing.DefaultComboBoxModel<>(new Produk[0]));
         cbProduk.addActionListener(this::cbProdukActionPerformed);
 
         txtHargaSatuan.setEditable(false);
@@ -247,19 +351,17 @@ public class Transaksi extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void txtTanggalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTanggalActionPerformed
-        // TODO add your handling code here:
     }//GEN-LAST:event_txtTanggalActionPerformed
 
     private void cbProdukActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbProdukActionPerformed
-        // TODO add your handling code here:
+        perbaruiTotal();
     }//GEN-LAST:event_cbProdukActionPerformed
 
     private void txtHargaSatuanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtHargaSatuanActionPerformed
-        // TODO add your handling code here:
     }//GEN-LAST:event_txtHargaSatuanActionPerformed
 
     private void btnSimpanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSimpanActionPerformed
-        // TODO add your handling code here:
+        simpanTransaksi();
     }//GEN-LAST:event_btnSimpanActionPerformed
 
     /**
@@ -289,7 +391,7 @@ public class Transaksi extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton btnSimpan;
-    private javax.swing.JComboBox<String> cbProduk;
+    private javax.swing.JComboBox<Produk> cbProduk;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

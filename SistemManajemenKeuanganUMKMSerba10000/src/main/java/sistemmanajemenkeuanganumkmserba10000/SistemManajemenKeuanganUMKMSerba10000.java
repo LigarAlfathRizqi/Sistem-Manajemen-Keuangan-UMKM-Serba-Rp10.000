@@ -4,6 +4,8 @@
 
 package sistemmanajemenkeuanganumkmserba10000;
 
+import sistemmanajemenkeuanganumkmserba10000.view.DashboardFrame;
+
 /**
  *
  * @author ligar
@@ -11,6 +13,6 @@ package sistemmanajemenkeuanganumkmserba10000;
 public class SistemManajemenKeuanganUMKMSerba10000 {
 
     public static void main(String[] args) {
-        System.out.println("Hello World!");
+        java.awt.EventQueue.invokeLater(() -> new DashboardFrame().setVisible(true));
     }
 }

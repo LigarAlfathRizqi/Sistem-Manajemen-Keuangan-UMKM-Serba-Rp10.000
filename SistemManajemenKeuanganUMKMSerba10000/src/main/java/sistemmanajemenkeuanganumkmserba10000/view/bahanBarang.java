@@ -1,5 +1,17 @@
 package sistemmanajemenkeuanganumkmserba10000.view;
 
+import sistemmanajemenkeuanganumkmserba10000.entity.Bahan;
+import sistemmanajemenkeuanganumkmserba10000.model.BahanTableModel;
+import sistemmanajemenkeuanganumkmserba10000.repository.BahanRepository;
+
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JTable;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.sql.SQLException;
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
@@ -12,12 +24,108 @@ package sistemmanajemenkeuanganumkmserba10000.view;
 public class bahanBarang extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(bahanBarang.class.getName());
+    private final BahanRepository repository = new BahanRepository();
+    private final BahanTableModel tableModel = new BahanTableModel();
 
     /**
      * Creates new form bahanBarang
      */
     public bahanBarang() {
         initComponents();
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        tblBahanHarga.setModel(tableModel);
+        pasangMenuTabel();
+        Navigasi.pasang(this);
+        muatData();
+    }
+
+    private void muatData() {
+        try {
+            tableModel.setData(repository.findAll());
+        } catch (SQLException ex) {
+            UiUtil.showError(this, ex);
+        }
+    }
+
+    private void pasangMenuTabel() {
+        JPopupMenu menu = new JPopupMenu();
+        JMenuItem ubah = new JMenuItem("Ubah bahan");
+        JMenuItem hapus = new JMenuItem("Hapus bahan");
+        ubah.addActionListener(event -> ubahTerpilih());
+        hapus.addActionListener(event -> hapusTerpilih());
+        menu.add(ubah);
+        menu.add(hapus);
+        tblBahanHarga.setComponentPopupMenu(menu);
+        tblBahanHarga.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent event) {
+                if (javax.swing.SwingUtilities.isRightMouseButton(event)) {
+                    int row = tblBahanHarga.rowAtPoint(event.getPoint());
+                    if (row >= 0) tblBahanHarga.setRowSelectionInterval(row, row);
+                }
+                if (event.getClickCount() == 2 && javax.swing.SwingUtilities.isLeftMouseButton(event)) {
+                    int row = tblBahanHarga.rowAtPoint(event.getPoint());
+                    if (row >= 0) {
+                        tblBahanHarga.setRowSelectionInterval(row, row);
+                        ubahTerpilih();
+                    }
+                }
+            }
+        });
+    }
+
+    private void tambahBahan() {
+        PopUpTambahBahan dialog = new PopUpTambahBahan(this, null);
+        dialog.setVisible(true);
+        Bahan bahan = dialog.getHasil();
+        if (bahan == null) return;
+        try {
+            repository.save(bahan);
+            muatData();
+        } catch (SQLException ex) {
+            UiUtil.showError(this, ex);
+        }
+    }
+
+    private Bahan bahanTerpilih() {
+        int row = tblBahanHarga.getSelectedRow();
+        return row < 0 ? null : tableModel.getBahanAt(tblBahanHarga.convertRowIndexToModel(row));
+    }
+
+    private void ubahTerpilih() {
+        Bahan bahan = bahanTerpilih();
+        if (bahan == null) {
+            JOptionPane.showMessageDialog(this, "Pilih bahan yang ingin diubah.");
+            return;
+        }
+        PopUpTambahBahan dialog = new PopUpTambahBahan(this, bahan);
+        dialog.setVisible(true);
+        Bahan hasil = dialog.getHasil();
+        if (hasil == null) return;
+        try {
+            repository.update(hasil);
+            muatData();
+        } catch (SQLException ex) {
+            UiUtil.showError(this, ex);
+        }
+    }
+
+    private void hapusTerpilih() {
+        Bahan bahan = bahanTerpilih();
+        if (bahan == null) {
+            JOptionPane.showMessageDialog(this, "Pilih bahan yang ingin dihapus.");
+            return;
+        }
+        int answer = JOptionPane.showConfirmDialog(this,
+                "Hapus " + bahan.getNama() + "? Bahan yang dipakai pada resep tidak bisa dihapus.",
+                "Konfirmasi hapus", JOptionPane.YES_NO_OPTION);
+        if (answer != JOptionPane.YES_OPTION) return;
+        try {
+            repository.delete(bahan.getId());
+            muatData();
+        } catch (SQLException ex) {
+            UiUtil.showError(this, ex);
+        }
     }
 
     /**
@@ -185,7 +293,7 @@ public class bahanBarang extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnTambahBahanActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTambahBahanActionPerformed
-        // TODO add your handling code here:
+        tambahBahan();
     }//GEN-LAST:event_btnTambahBahanActionPerformed
 
     /**

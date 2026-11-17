@@ -4,6 +4,23 @@
  */
 package sistemmanajemenkeuanganumkmserba10000.view;
 
+import sistemmanajemenkeuanganumkmserba10000.entity.Bahan;
+import sistemmanajemenkeuanganumkmserba10000.entity.Produk;
+import sistemmanajemenkeuanganumkmserba10000.entity.ProdukBahan;
+import sistemmanajemenkeuanganumkmserba10000.model.ProdukTableModel;
+import sistemmanajemenkeuanganumkmserba10000.repository.BahanRepository;
+import sistemmanajemenkeuanganumkmserba10000.repository.ProdukBahanRepository;
+import sistemmanajemenkeuanganumkmserba10000.repository.ProdukRepository;
+
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPopupMenu;
+import javax.swing.JTable;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.sql.SQLException;
+import java.util.List;
+
 /**
  *
  * @author ASUS ROG
@@ -11,12 +28,127 @@ package sistemmanajemenkeuanganumkmserba10000.view;
 public class ProdukFrame extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(ProdukFrame.class.getName());
+    private final ProdukRepository produkRepository = new ProdukRepository();
+    private final BahanRepository bahanRepository = new BahanRepository();
+    private final ProdukBahanRepository resepRepository = new ProdukBahanRepository();
+    private final ProdukTableModel tableModel = new ProdukTableModel();
 
     /**
      * Creates new form ProdukFrame
      */
     public ProdukFrame() {
         initComponents();
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        tblProduk.setModel(tableModel);
+        pasangMenuTabel();
+        Navigasi.pasang(this);
+        muatData();
+    }
+
+    private void muatData() {
+        try {
+            tableModel.setData(produkRepository.findAll(), resepRepository.findAll());
+        } catch (SQLException ex) {
+            UiUtil.showError(this, ex);
+        }
+    }
+
+    private void pasangMenuTabel() {
+        JPopupMenu menu = new JPopupMenu();
+        JMenuItem ubah = new JMenuItem("Ubah produk/resep");
+        JMenuItem hapus = new JMenuItem("Hapus produk");
+        ubah.addActionListener(event -> ubahTerpilih());
+        hapus.addActionListener(event -> hapusTerpilih());
+        menu.add(ubah);
+        menu.add(hapus);
+        tblProduk.setComponentPopupMenu(menu);
+        tblProduk.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent event) {
+                if (javax.swing.SwingUtilities.isRightMouseButton(event)) {
+                    int row = tblProduk.rowAtPoint(event.getPoint());
+                    if (row >= 0) tblProduk.setRowSelectionInterval(row, row);
+                }
+                if (event.getClickCount() == 2 && javax.swing.SwingUtilities.isLeftMouseButton(event)) {
+                    int row = tblProduk.rowAtPoint(event.getPoint());
+                    if (row >= 0) {
+                        tblProduk.setRowSelectionInterval(row, row);
+                        ubahTerpilih();
+                    }
+                }
+            }
+        });
+    }
+
+    private Produk produkTerpilih() {
+        int row = tblProduk.getSelectedRow();
+        return row < 0 ? null : tableModel.getProdukAt(tblProduk.convertRowIndexToModel(row));
+    }
+
+    private void tambahProduk() {
+        try {
+            List<Bahan> bahan = bahanRepository.findAll();
+            if (bahan.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "Tambahkan bahan/barang terlebih dahulu.",
+                        "Bahan belum tersedia", JOptionPane.INFORMATION_MESSAGE);
+                return;
+            }
+            PopUpTambahProduk dialog = new PopUpTambahProduk(this, bahan, null, List.of());
+            dialog.setVisible(true);
+            if (dialog.getProdukHasil() == null) return;
+            produkRepository.save(dialog.getProdukHasil());
+            try {
+                resepRepository.replaceForProduk(dialog.getProdukHasil().getId(), dialog.getKomposisiHasil());
+            } catch (SQLException ex) {
+                produkRepository.delete(dialog.getProdukHasil().getId());
+                throw ex;
+            }
+            muatData();
+        } catch (SQLException ex) {
+            UiUtil.showError(this, ex);
+        }
+    }
+
+    private void ubahTerpilih() {
+        Produk produk = produkTerpilih();
+        if (produk == null) {
+            JOptionPane.showMessageDialog(this, "Pilih produk yang ingin diubah.");
+            return;
+        }
+        try {
+            PopUpTambahProduk dialog = new PopUpTambahProduk(this, bahanRepository.findAll(),
+                    produk, resepRepository.findByProdukId(produk.getId()));
+            dialog.setVisible(true);
+            if (dialog.getProdukHasil() == null) return;
+            produkRepository.update(dialog.getProdukHasil());
+            try {
+                resepRepository.replaceForProduk(produk.getId(), dialog.getKomposisiHasil());
+            } catch (SQLException ex) {
+                produkRepository.update(produk);
+                throw ex;
+            }
+            muatData();
+        } catch (SQLException ex) {
+            UiUtil.showError(this, ex);
+        }
+    }
+
+    private void hapusTerpilih() {
+        Produk produk = produkTerpilih();
+        if (produk == null) {
+            JOptionPane.showMessageDialog(this, "Pilih produk yang ingin dihapus.");
+            return;
+        }
+        int answer = JOptionPane.showConfirmDialog(this,
+                "Hapus produk " + produk.getNama() + "? Produk yang pernah dijual tidak dapat dihapus.",
+                "Konfirmasi hapus", JOptionPane.YES_NO_OPTION);
+        if (answer != JOptionPane.YES_OPTION) return;
+        try {
+            produkRepository.delete(produk.getId());
+            muatData();
+        } catch (SQLException ex) {
+            UiUtil.showError(this, ex);
+        }
     }
 
     /**
@@ -189,7 +321,7 @@ public class ProdukFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void btnTambahProdukActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnTambahProdukActionPerformed
-        // TODO add your handling code here:
+        tambahProduk();
     }//GEN-LAST:event_btnTambahProdukActionPerformed
 
     /**

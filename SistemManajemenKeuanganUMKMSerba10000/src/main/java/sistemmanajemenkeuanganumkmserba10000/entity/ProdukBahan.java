@@ -1,18 +1,26 @@
 package sistemmanajemenkeuanganumkmserba10000.entity;
 
+import java.math.BigDecimal;
+
 public class ProdukBahan {
 
     private int id;
     private Produk produk;
     private Bahan bahan;
+    private BigDecimal jumlahPemakaian;
 
     public ProdukBahan() {
     }
 
     public ProdukBahan(int id, Produk produk, Bahan bahan) {
+        this(id, produk, bahan, BigDecimal.ONE);
+    }
+
+    public ProdukBahan(int id, Produk produk, Bahan bahan, BigDecimal jumlahPemakaian) {
         this.id = id;
         this.produk = produk;
         this.bahan = bahan;
+        this.jumlahPemakaian = jumlahPemakaian;
     }
 
     public int getId() {
@@ -37,5 +45,13 @@ public class ProdukBahan {
 
     public void setBahan(Bahan bahan) {
         this.bahan = bahan;
+    }
+
+    public BigDecimal getJumlahPemakaian() {
+        return jumlahPemakaian;
+    }
+
+    public void setJumlahPemakaian(BigDecimal jumlahPemakaian) {
+        this.jumlahPemakaian = jumlahPemakaian;
     }
 }

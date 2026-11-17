@@ -40,4 +40,9 @@ public class Produk {
     public void setHarga(BigDecimal harga) {
         this.harga = harga;
     }
+
+    @Override
+    public String toString() {
+        return nama == null ? "" : nama;
+    }
 }

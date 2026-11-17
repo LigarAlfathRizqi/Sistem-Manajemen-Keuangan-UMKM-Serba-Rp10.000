@@ -37,7 +37,7 @@ public class TransaksiTableModel extends AbstractTableModel {
     }
 
     private BigDecimal hitungTotal(Transaksi transaksi) {
-        return transaksi.getProduk().getHarga()
+        return transaksi.getHargaJualSatuan()
                 .multiply(BigDecimal.valueOf(transaksi.getJumlah()));
     }
 
@@ -69,7 +69,7 @@ public class TransaksiTableModel extends AbstractTableModel {
                 return transaksi.getJumlah();
             case 3:
                 return RupiahUtil.format(
-                        transaksi.getProduk().getHarga());
+                        transaksi.getHargaJualSatuan());
             case 4:
                 return RupiahUtil.format(hitungTotal(transaksi));
             case 5:
@@ -82,5 +82,10 @@ public class TransaksiTableModel extends AbstractTableModel {
     @Override
     public boolean isCellEditable(int row, int column) {
         return false;
+    }
+
+    public void hapusDataAt(int row) {
+        daftarTransaksi.remove(row);
+        fireTableRowsDeleted(row, row);
     }
 }

@@ -1,5 +1,30 @@
 package sistemmanajemenkeuanganumkmserba10000.view;
 
+import sistemmanajemenkeuanganumkmserba10000.entity.Transaksi;
+import sistemmanajemenkeuanganumkmserba10000.model.LaporanTableModel;
+import sistemmanajemenkeuanganumkmserba10000.model.RupiahUtil;
+import sistemmanajemenkeuanganumkmserba10000.repository.TransaksiRepository;
+
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JSpinner;
+import javax.swing.JTextField;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.JTable;
+import java.awt.FlowLayout;
+import java.awt.Dimension;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.sql.SQLException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAdjusters;
+import java.time.DayOfWeek;
+import java.util.List;
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JFrame.java to edit this template
@@ -12,12 +37,162 @@ package sistemmanajemenkeuanganumkmserba10000.view;
 public class Laporan extends javax.swing.JFrame {
     
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(Laporan.class.getName());
+    private final TransaksiRepository transaksiRepository = new TransaksiRepository();
+    private final LaporanTableModel tableModel = new LaporanTableModel();
+    private boolean sedangMemuatPeriode;
 
     /**
      * Creates new form Laporan
      */
     public Laporan() {
         initComponents();
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setMinimumSize(new Dimension(1000, 650));
+        setSize(1150, 720);
+        setLocationRelativeTo(null);
+        cbFilterMinggu.setPreferredSize(new Dimension(280, 28));
+        tblLaporan.setModel(tableModel);
+        tblLaporan.setAutoCreateRowSorter(true);
+        tblLaporan.setFillsViewportHeight(true);
+        tblLaporan.setRowHeight(24);
+        int[] columnWidths = {105, 190, 105, 70, 145, 145, 130};
+        for (int i = 0; i < columnWidths.length; i++) {
+            tblLaporan.getColumnModel().getColumn(i).setPreferredWidth(columnWidths[i]);
+        }
+        pasangMenuTabel();
+        Navigasi.pasang(this);
+        muatPilihanPeriode();
+        tampilkanLaporan();
+    }
+
+    private void muatPilihanPeriode() {
+        for (ActionListener listener : cbFilterMinggu.getActionListeners()) {
+            cbFilterMinggu.removeActionListener(listener);
+        }
+        cbFilterMinggu.removeAllItems();
+        LocalDate hariIni = LocalDate.now();
+        DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd MMM yyyy", java.util.Locale.forLanguageTag("id-ID"));
+        for (int i = 0; i < 30; i++) {
+            LocalDate date = hariIni.minusDays(i);
+            cbFilterMinggu.addItem(new PeriodeLaporan("Harian: " + date.format(dateFormat), date, date));
+        }
+        LocalDate awalMinggu = hariIni.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        for (int i = 0; i < 12; i++) {
+            LocalDate start = awalMinggu.minusWeeks(i);
+            LocalDate end = start.plusDays(6);
+            cbFilterMinggu.addItem(new PeriodeLaporan("Mingguan: " + start.format(dateFormat)
+                    + " - " + end.format(dateFormat), start, end));
+        }
+        cbFilterMinggu.setSelectedIndex(30);
+        cbFilterMinggu.addActionListener(this::cbFilterMingguActionPerformed);
+    }
+
+    private void tampilkanLaporan() {
+        if (sedangMemuatPeriode) return;
+        PeriodeLaporan periode = (PeriodeLaporan) cbFilterMinggu.getSelectedItem();
+        if (periode == null) return;
+        sedangMemuatPeriode = true;
+        try {
+            List<Transaksi> transaksi = transaksiRepository.findByRange(periode.mulai, periode.sampai);
+            tableModel.setData(transaksi);
+            lblTotalPemasukan.setText("<html><center>Pemasukan<br>" + RupiahUtil.format(tableModel.getTotalPemasukan()) + "</center></html>");
+            lblTotalPengeluaran.setText("<html><center>Pengeluaran<br>" + RupiahUtil.format(tableModel.getTotalPengeluaran()) + "</center></html>");
+            lblTotalLaba.setText("<html><center>Laba<br>" + RupiahUtil.format(tableModel.getTotalLaba()) + "</center></html>");
+            jLabel2.setText("Laporan Detail — " + periode.nama);
+        } catch (SQLException ex) {
+            UiUtil.showError(this, ex);
+            tableModel.setData(List.of());
+            lblTotalPemasukan.setText("<html><center>Pemasukan<br>Rp 0</center></html>");
+            lblTotalPengeluaran.setText("<html><center>Pengeluaran<br>Rp 0</center></html>");
+            lblTotalLaba.setText("<html><center>Laba<br>Rp 0</center></html>");
+        } finally {
+            sedangMemuatPeriode = false;
+        }
+    }
+
+    private void pasangMenuTabel() {
+        JPopupMenu menu = new JPopupMenu();
+        JMenuItem ubah = new JMenuItem("Ubah jumlah/keterangan");
+        JMenuItem hapus = new JMenuItem("Hapus transaksi");
+        ubah.addActionListener(event -> ubahTerpilih());
+        hapus.addActionListener(event -> hapusTerpilih());
+        menu.add(ubah);
+        menu.add(hapus);
+        tblLaporan.setComponentPopupMenu(menu);
+        tblLaporan.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent event) {
+                if (javax.swing.SwingUtilities.isRightMouseButton(event)) {
+                    int row = tblLaporan.rowAtPoint(event.getPoint());
+                    if (row >= 0) tblLaporan.setRowSelectionInterval(row, row);
+                }
+            }
+        });
+    }
+
+    private Transaksi transaksiTerpilih() {
+        int viewRow = tblLaporan.getSelectedRow();
+        return viewRow < 0 ? null : tableModel.getTransaksiAt(tblLaporan.convertRowIndexToModel(viewRow));
+    }
+
+    private void ubahTerpilih() {
+        Transaksi transaksi = transaksiTerpilih();
+        if (transaksi == null) {
+            JOptionPane.showMessageDialog(this, "Pilih transaksi yang ingin diubah.");
+            return;
+        }
+        JSpinner jumlah = new JSpinner(new SpinnerNumberModel(transaksi.getJumlah(), 1, 1_000_000, 1));
+        JTextField keterangan = new JTextField(transaksi.getKeterangan(), 24);
+        JPanel form = new JPanel(new java.awt.GridLayout(0, 1, 5, 5));
+        form.add(new javax.swing.JLabel("Jumlah produk"));
+        form.add(jumlah);
+        form.add(new javax.swing.JLabel("Keterangan"));
+        form.add(keterangan);
+        if (JOptionPane.showConfirmDialog(this, form, "Ubah transaksi",
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE) != JOptionPane.OK_OPTION) return;
+        transaksi.setJumlah((Integer) jumlah.getValue());
+        transaksi.setKeterangan(keterangan.getText().trim());
+        try {
+            transaksiRepository.update(transaksi);
+            tampilkanLaporan();
+        } catch (SQLException ex) {
+            UiUtil.showError(this, ex);
+        }
+    }
+
+    private void hapusTerpilih() {
+        Transaksi transaksi = transaksiTerpilih();
+        if (transaksi == null) {
+            JOptionPane.showMessageDialog(this, "Pilih transaksi yang ingin dihapus.");
+            return;
+        }
+        int answer = JOptionPane.showConfirmDialog(this,
+                "Hapus transaksi " + transaksi.getProduk().getNama() + " tanggal " + transaksi.getTanggal() + "?",
+                "Konfirmasi hapus", JOptionPane.YES_NO_OPTION);
+        if (answer != JOptionPane.YES_OPTION) return;
+        try {
+            transaksiRepository.delete(transaksi.getId());
+            tampilkanLaporan();
+        } catch (SQLException ex) {
+            UiUtil.showError(this, ex);
+        }
+    }
+
+    private static final class PeriodeLaporan {
+        private final String nama;
+        private final LocalDate mulai;
+        private final LocalDate sampai;
+
+        private PeriodeLaporan(String nama, LocalDate mulai, LocalDate sampai) {
+            this.nama = nama;
+            this.mulai = mulai;
+            this.sampai = sampai;
+        }
+
+        @Override
+        public String toString() {
+            return nama;
+        }
     }
 
     /**
@@ -114,7 +289,7 @@ public class Laporan extends javax.swing.JFrame {
         jLabel2.setForeground(new java.awt.Color(51, 51, 255));
         jLabel2.setText("Laporan Detail");
 
-        cbFilterMinggu.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cbFilterMinggu.setModel(new javax.swing.DefaultComboBoxModel<PeriodeLaporan>());
         cbFilterMinggu.addActionListener(this::cbFilterMingguActionPerformed);
 
         jPanel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
@@ -245,7 +420,7 @@ public class Laporan extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jLabel2)
                         .addGap(12, 12, 12)
-                        .addComponent(cbFilterMinggu, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(cbFilterMinggu, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(17, 17, 17)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jPanel6, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -274,7 +449,7 @@ public class Laporan extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cbFilterMingguActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbFilterMingguActionPerformed
-        // TODO add your handling code here:
+        tampilkanLaporan();
     }//GEN-LAST:event_cbFilterMingguActionPerformed
 
     /**
@@ -303,7 +478,7 @@ public class Laporan extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JComboBox<String> cbFilterMinggu;
+    private javax.swing.JComboBox<PeriodeLaporan> cbFilterMinggu;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

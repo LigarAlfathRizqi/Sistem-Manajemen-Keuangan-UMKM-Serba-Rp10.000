@@ -11,6 +11,7 @@ public class BahanTableModel extends AbstractTableModel {
 
     private final String[] kolom = {
         "Nama Bahan/Barang",
+        "Satuan",
         "Harga"
     };
 
@@ -54,6 +55,8 @@ public class BahanTableModel extends AbstractTableModel {
             case 0:
                 return bahan.getNama();
             case 1:
+                return bahan.getSatuan();
+            case 2:
                 return RupiahUtil.format(bahan.getHarga());
             default:
                 return null;
