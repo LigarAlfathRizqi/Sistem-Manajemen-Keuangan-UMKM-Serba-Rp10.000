@@ -270,7 +270,6 @@ public class Transaksi extends javax.swing.JFrame {
         jPanel1.add(txtTanggal);
         txtTanggal.setBounds(250, 120, 105, 22);
 
-        cbProduk.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbProduk.addActionListener(this::cbProdukActionPerformed);
         jPanel1.add(cbProduk);
         cbProduk.setBounds(250, 160, 105, 22);
@@ -339,6 +338,7 @@ public class Transaksi extends javax.swing.JFrame {
         );
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void txtTanggalActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTanggalActionPerformed

@@ -49,10 +49,6 @@ public class Laporan extends javax.swing.JFrame {
         getContentPane().setLayout(new java.awt.BorderLayout());
         getContentPane().add(jPanel1, java.awt.BorderLayout.CENTER);
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setMinimumSize(new Dimension(1000, 650));
-        setSize(1150, 720);
-        setLocationRelativeTo(null);
-        cbFilterMinggu.setPreferredSize(new Dimension(280, 28));
         tblLaporan.setModel(tableModel);
         tblLaporan.setAutoCreateRowSorter(true);
         tblLaporan.setFillsViewportHeight(true);
@@ -100,7 +96,6 @@ public class Laporan extends javax.swing.JFrame {
             lblTotalPemasukan.setText("<html><center>Pemasukan<br>" + RupiahUtil.format(tableModel.getTotalPemasukan()) + "</center></html>");
             lblTotalPengeluaran.setText("<html><center>Pengeluaran<br>" + RupiahUtil.format(tableModel.getTotalPengeluaran()) + "</center></html>");
             lblTotalLaba.setText("<html><center>Laba<br>" + RupiahUtil.format(tableModel.getTotalLaba()) + "</center></html>");
-            jLabel2.setText("Laporan Detail — " + periode.nama);
         } catch (SQLException ex) {
             UiUtil.showError(this, ex);
             tableModel.setData(List.of());
@@ -268,19 +263,18 @@ public class Laporan extends javax.swing.JFrame {
         jLabel11.setBounds(20, 237, 60, 15);
 
         jPanel1.add(jPanel2);
-        jPanel2.setBounds(0, 70, 110, 390);
+        jPanel2.setBounds(0, 70, 110, 410);
 
         jLabel2.setFont(new java.awt.Font("Goudy Old Style", 1, 28)); // NOI18N
         jLabel2.setForeground(new java.awt.Color(91, 126, 60));
         jLabel2.setText("Laporan Detail");
         jPanel1.add(jLabel2);
-        jLabel2.setBounds(210, 80, 200, 30);
+        jLabel2.setBounds(330, 80, 200, 30);
 
         cbFilterMinggu.setFont(new java.awt.Font("Lucida Bright", 0, 12)); // NOI18N
-        cbFilterMinggu.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbFilterMinggu.addActionListener(this::cbFilterMingguActionPerformed);
         jPanel1.add(cbFilterMinggu);
-        cbFilterMinggu.setBounds(430, 110, 70, 20);
+        cbFilterMinggu.setBounds(390, 110, 300, 20);
 
         jPanel3.setBackground(new java.awt.Color(243, 243, 231));
         jPanel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
@@ -334,7 +328,7 @@ public class Laporan extends javax.swing.JFrame {
         );
 
         jPanel1.add(jPanel6);
-        jPanel6.setBounds(410, 140, 91, 57);
+        jPanel6.setBounds(600, 140, 91, 57);
 
         jPanel7.setBackground(new java.awt.Color(243, 243, 231));
         jPanel7.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
@@ -361,7 +355,7 @@ public class Laporan extends javax.swing.JFrame {
         );
 
         jPanel1.add(jPanel7);
-        jPanel7.setBounds(270, 140, 99, 57);
+        jPanel7.setBounds(380, 140, 99, 57);
 
         tblLaporan.setFont(new java.awt.Font("Lucida Bright", 0, 12)); // NOI18N
         tblLaporan.setModel(new javax.swing.table.DefaultTableModel(
@@ -380,7 +374,7 @@ public class Laporan extends javax.swing.JFrame {
         jScrollPane1.setViewportView(tblLaporan);
 
         jPanel1.add(jScrollPane1);
-        jScrollPane1.setBounds(130, 230, 380, 130);
+        jScrollPane1.setBounds(130, 230, 560, 180);
 
         jPanel4.setBackground(new java.awt.Color(91, 126, 60));
 
@@ -393,9 +387,9 @@ public class Laporan extends javax.swing.JFrame {
         jPanel4Layout.setHorizontalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel4Layout.createSequentialGroup()
-                .addContainerGap(73, Short.MAX_VALUE)
+                .addContainerGap(152, Short.MAX_VALUE)
                 .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 420, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(47, 47, 47))
+                .addGap(158, 158, 158))
         );
         jPanel4Layout.setVerticalGroup(
             jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -403,24 +397,23 @@ public class Laporan extends javax.swing.JFrame {
         );
 
         jPanel1.add(jPanel4);
-        jPanel4.setBounds(-9, 1, 540, 70);
+        jPanel4.setBounds(-9, 1, 730, 70);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 530, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 0, Short.MAX_VALUE))
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 716, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 459, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 460, Short.MAX_VALUE)
                 .addGap(0, 0, Short.MAX_VALUE))
         );
 
-        pack();
+        setSize(new java.awt.Dimension(730, 510));
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     private void cbFilterMingguActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cbFilterMingguActionPerformed
