@@ -414,6 +414,7 @@ public class DashboardFrame extends javax.swing.JFrame {
 
         jLabel8.setFont(new java.awt.Font("Lucida Bright", 1, 12)); // NOI18N
         jLabel8.setForeground(new java.awt.Color(91, 126, 60));
+        jLabel8.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel8.setText("Produk Terlaris");
 
         javax.swing.GroupLayout jPanel12Layout = new javax.swing.GroupLayout(jPanel12);
@@ -421,7 +422,7 @@ public class DashboardFrame extends javax.swing.JFrame {
         jPanel12Layout.setHorizontalGroup(
             jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel12Layout.createSequentialGroup()
-                .addContainerGap(49, Short.MAX_VALUE)
+                .addContainerGap(34, Short.MAX_VALUE)
                 .addComponent(jLabel8)
                 .addGap(52, 52, 52))
         );
@@ -434,13 +435,14 @@ public class DashboardFrame extends javax.swing.JFrame {
         );
 
         jPanel1.add(jPanel12);
-        jPanel12.setBounds(130, 630, 200, 152);
+        jPanel12.setBounds(130, 630, 185, 152);
 
         jPanel14.setBackground(new java.awt.Color(243, 243, 231));
         jPanel14.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
         jLabel9.setFont(new java.awt.Font("Lucida Bright", 1, 12)); // NOI18N
         jLabel9.setForeground(new java.awt.Color(91, 126, 60));
+        jLabel9.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         jLabel9.setText("Penjualan Terbesar");
 
         javax.swing.GroupLayout jPanel14Layout = new javax.swing.GroupLayout(jPanel14);
@@ -448,7 +450,7 @@ public class DashboardFrame extends javax.swing.JFrame {
         jPanel14Layout.setHorizontalGroup(
             jPanel14Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel14Layout.createSequentialGroup()
-                .addContainerGap(62, Short.MAX_VALUE)
+                .addContainerGap(37, Short.MAX_VALUE)
                 .addComponent(jLabel9)
                 .addGap(27, 27, 27))
         );
@@ -461,7 +463,7 @@ public class DashboardFrame extends javax.swing.JFrame {
         );
 
         jPanel1.add(jPanel14);
-        jPanel14.setBounds(300, 630, 210, 152);
+        jPanel14.setBounds(325, 630, 185, 152);
 
         jLabel13.setFont(new java.awt.Font("Lucida Bright", 1, 12)); // NOI18N
         jLabel13.setForeground(new java.awt.Color(91, 126, 60));
