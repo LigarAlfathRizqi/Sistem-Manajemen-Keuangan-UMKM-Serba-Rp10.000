@@ -330,7 +330,7 @@ public class DashboardFrame extends javax.swing.JFrame {
         );
 
         jPanel1.add(jPanel4);
-        jPanel4.setBounds(130, 150, 134, 81);
+        jPanel4.setBounds(130, 150, 131, 81);
 
         jPanel5.setBackground(new java.awt.Color(243, 243, 231));
         jPanel5.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
@@ -357,7 +357,7 @@ public class DashboardFrame extends javax.swing.JFrame {
         );
 
         jPanel1.add(jPanel5);
-        jPanel5.setBounds(260, 150, 124, 81);
+        jPanel5.setBounds(260, 150, 120, 81);
 
         jPanel8.setBackground(new java.awt.Color(243, 243, 231));
         jPanel8.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
@@ -390,7 +390,7 @@ public class DashboardFrame extends javax.swing.JFrame {
         cbFilterMinggu.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
         cbFilterMinggu.addActionListener(this::cbFilterMingguActionPerformed);
         jPanel1.add(cbFilterMinggu);
-        cbFilterMinggu.setBounds(410, 260, 90, 21);
+        cbFilterMinggu.setBounds(410, 260, 100, 21);
 
         panelGrafik.setBackground(new java.awt.Color(190, 218, 174));
         panelGrafik.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));

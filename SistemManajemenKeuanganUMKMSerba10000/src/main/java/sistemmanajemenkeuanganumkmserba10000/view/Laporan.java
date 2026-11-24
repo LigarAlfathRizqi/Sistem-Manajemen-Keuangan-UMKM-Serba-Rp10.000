@@ -274,14 +274,14 @@ public class Laporan extends javax.swing.JFrame {
         cbFilterMinggu.setFont(new java.awt.Font("Lucida Bright", 0, 12)); // NOI18N
         cbFilterMinggu.addActionListener(this::cbFilterMingguActionPerformed);
         jPanel1.add(cbFilterMinggu);
-        cbFilterMinggu.setBounds(390, 110, 300, 20);
+        cbFilterMinggu.setBounds(440, 110, 250, 20);
 
         jPanel3.setBackground(new java.awt.Color(243, 243, 231));
         jPanel3.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
         lblTotalPemasukan.setFont(new java.awt.Font("Lucida Bright", 1, 12)); // NOI18N
         lblTotalPemasukan.setForeground(new java.awt.Color(102, 0, 204));
-        lblTotalPemasukan.setText(" Pemasukan");
+        lblTotalPemasukan.setText("     Pemasukan");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
         jPanel3.setLayout(jPanel3Layout);
@@ -289,19 +289,19 @@ public class Laporan extends javax.swing.JFrame {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblTotalPemasukan, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(lblTotalPemasukan, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(12, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
-                .addGap(17, 17, 17)
+                .addContainerGap()
                 .addComponent(lblTotalPemasukan)
-                .addContainerGap(23, Short.MAX_VALUE))
+                .addContainerGap(34, Short.MAX_VALUE))
         );
 
         jPanel1.add(jPanel3);
-        jPanel3.setBounds(140, 140, 91, 57);
+        jPanel3.setBounds(170, 140, 120, 57);
 
         jPanel6.setBackground(new java.awt.Color(243, 243, 231));
         jPanel6.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
@@ -315,47 +315,47 @@ public class Laporan extends javax.swing.JFrame {
         jPanel6Layout.setHorizontalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
-                .addContainerGap(27, Short.MAX_VALUE)
-                .addComponent(lblTotalLaba, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(14, 14, 14))
+                .addContainerGap(44, Short.MAX_VALUE)
+                .addComponent(lblTotalLaba)
+                .addGap(45, 45, 45))
         );
         jPanel6Layout.setVerticalGroup(
             jPanel6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel6Layout.createSequentialGroup()
-                .addContainerGap(21, Short.MAX_VALUE)
+            .addGroup(jPanel6Layout.createSequentialGroup()
+                .addContainerGap()
                 .addComponent(lblTotalLaba)
-                .addGap(19, 19, 19))
+                .addContainerGap(34, Short.MAX_VALUE))
         );
 
         jPanel1.add(jPanel6);
-        jPanel6.setBounds(600, 140, 91, 57);
+        jPanel6.setBounds(530, 140, 120, 57);
 
         jPanel7.setBackground(new java.awt.Color(243, 243, 231));
         jPanel7.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
 
         lblTotalPengeluaran.setFont(new java.awt.Font("Lucida Bright", 1, 12)); // NOI18N
         lblTotalPengeluaran.setForeground(new java.awt.Color(204, 0, 0));
-        lblTotalPengeluaran.setText(" Pengeluaran");
+        lblTotalPengeluaran.setText("    Pengeluaran");
 
         javax.swing.GroupLayout jPanel7Layout = new javax.swing.GroupLayout(jPanel7);
         jPanel7.setLayout(jPanel7Layout);
         jPanel7Layout.setHorizontalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel7Layout.createSequentialGroup()
+            .addGroup(jPanel7Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(lblTotalPengeluaran, javax.swing.GroupLayout.DEFAULT_SIZE, 85, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(lblTotalPengeluaran)
+                .addContainerGap(21, Short.MAX_VALUE))
         );
         jPanel7Layout.setVerticalGroup(
             jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel7Layout.createSequentialGroup()
-                .addGap(17, 17, 17)
+                .addContainerGap()
                 .addComponent(lblTotalPengeluaran)
-                .addContainerGap(23, Short.MAX_VALUE))
+                .addContainerGap(34, Short.MAX_VALUE))
         );
 
         jPanel1.add(jPanel7);
-        jPanel7.setBounds(380, 140, 99, 57);
+        jPanel7.setBounds(350, 140, 120, 57);
 
         tblLaporan.setFont(new java.awt.Font("Lucida Bright", 0, 12)); // NOI18N
         tblLaporan.setModel(new javax.swing.table.DefaultTableModel(
